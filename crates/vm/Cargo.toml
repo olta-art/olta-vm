@@ -9,3 +9,4 @@ serde_json = {workspace = true}
 anyhow = {workspace = true}
 tokio-tungstenite = {workspace = true}
 tokio = {workspace = true}
+uuid = {workspace = true}

@@ -1,9 +1,13 @@
-use serde::{Serialize, Deserialize};
-use std::collections::BTreeMap;
-use tokio_tungstenite::{WebSocketStream};
+use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, HashSet};
 use tokio::net::TcpStream;
+use tokio_tungstenite::WebSocketStream;
 
 pub type Subscriber = WebSocketStream<TcpStream>;
+pub type CollectionName = String;
+pub type Collection = BTreeMap<String, Document>;
+pub type Collections = BTreeMap<CollectionName, Collection>;
+
 /// collection's transaction analogue
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Document {
@@ -11,6 +15,8 @@ pub struct Document {
     pub id: u64,
     #[serde(rename = "_creator")]
     pub creator: String,
+    #[serde(rename = "_request_id")]
+    pub request_id: String,
     pub x: String,
     pub y: String,
     pub z: String,
@@ -27,14 +33,14 @@ pub struct Document {
 #[derive(Debug, Default)]
 pub struct Lobby {
     pub process_id: String,
-    pub collections: Option<BTreeMap<String, BTreeMap<String, Document>>>,
-    pub subscribers: Option<Vec<Subscriber>>,
-    pub last_update: Option<u64>,
+    pub collections: Collections,
+    pub subscribers: Vec<Subscriber>,
+    pub processed_txs: HashSet<String>,
 }
 
 /// Delta upates
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct  DocumentChanges {
+pub struct DocumentChanges {
     pub x: Option<String>,
     pub y: Option<String>,
     pub z: Option<String>,
@@ -44,5 +50,5 @@ pub struct  DocumentChanges {
     #[serde(rename = "rotY")]
     pub rot_y: Option<String>,
     #[serde(rename = "rotZ")]
-    pub rot_z: Option<String>
+    pub rot_z: Option<String>,
 }

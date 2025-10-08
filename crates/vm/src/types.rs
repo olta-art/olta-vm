@@ -15,8 +15,8 @@ pub struct Document {
     pub id: u64,
     #[serde(rename = "_creator")]
     pub creator: String,
-    #[serde(rename = "_request_id")]
-    pub request_id: String,
+    // #[serde(rename = "_request_id")]
+    // pub request_id: String,
     pub x: String,
     pub y: String,
     pub z: String,

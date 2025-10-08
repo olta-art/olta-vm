@@ -1,4 +1,3 @@
-use tokio::net::TcpStream;
-use tokio_tungstenite::WebSocketStream;
+use tokio::sync::mpsc;
 
-pub(crate) type Subscriber = WebSocketStream<TcpStream>;
+pub(crate) type Subscriber = mpsc::UnboundedSender<String>;

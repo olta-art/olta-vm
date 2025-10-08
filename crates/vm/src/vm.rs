@@ -11,6 +11,7 @@ impl Lobby {
             process_id: pid.to_string(),
             collections: BTreeMap::new(),
             processed_txs: HashSet::new(),
+            hot: false
         }
     }
 
@@ -39,6 +40,7 @@ impl Lobby {
 
         let mut doc = document;
         doc.id = next_id;
+        self.hot = true;
 
         collection.insert(next_id.to_string(), doc);
         Ok(next_id.to_string())
@@ -79,6 +81,8 @@ impl Lobby {
         if let Some(rot_z) = changes.rot_z {
             document.rot_z = rot_z;
         }
+
+        self.hot = true;
 
         Ok(())
     }

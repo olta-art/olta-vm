@@ -1,8 +1,8 @@
 [workspace]
 members = [
     "crates/vm",       
-    "crates/server"
-]
+    "crates/server", 
+    "crates/storage"]
 resolver = "2"
 
 [workspace.dependencies]

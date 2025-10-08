@@ -1,10 +1,14 @@
+/// TODO: proper error types
 use crate::{
     messages::{Input, Output},
     types::Subscriber,
 };
 use anyhow::{Error, anyhow};
 use std::collections::HashMap;
-use vm::{Lobby, types::Document};
+use vm::{
+    Lobby,
+    types::{Document, DocumentChanges},
+};
 
 #[derive(Debug)]
 pub struct Server {
@@ -80,5 +84,54 @@ impl Server {
         .await?;
 
         Ok(doc_id)
+    }
+
+    pub async fn update_document(
+        &mut self,
+        pid: &str,
+        collection_name: &str,
+        doc_id: &str,
+        changes: DocumentChanges,
+    ) -> Result<(), Error> {
+        let lobby = self.get_lobby(pid)?;
+        let res = lobby
+            .update_document(collection_name, doc_id, changes)
+            .map_err(|_| anyhow!("".to_string()))?;
+
+        let _ = self.broadcast_to_lobby(
+            pid,
+            Output::DocumentUpdated {
+                process_id: pid.to_string(),
+                collection_name: collection_name.to_string(),
+                doc_id: doc_id.to_string(),
+                changes: res,
+            },
+        );
+        Ok(())
+    }
+
+    pub async fn delete_document(
+        &mut self,
+        pid: &str,
+        collection_name: &str,
+        doc_id: &str,
+    ) -> Result<(), Error> {
+        let lobby = self.get_lobby(pid)?;
+        let success =
+            lobby.delete_document(collection_name, doc_id).map_err(|_| anyhow!("".to_string()))?;
+
+        if success {
+            let _ = self.broadcast_to_lobby(
+                pid,
+                Output::DocumentDeleted {
+                    process_id: pid.to_string(),
+                    collection_name: collection_name.to_string(),
+                    doc_id: doc_id.to_string(),
+                },
+            );
+            Ok(())
+        } else {
+            Err(anyhow!("".to_string()))
+        }
     }
 }

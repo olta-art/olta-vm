@@ -1,8 +1,6 @@
 use crate::{
     errors::VMErrors,
-    types::{
-        Collection, CollectionName, Collections, Document, DocumentChanges, Lobby, Subscriber,
-    },
+    types::{Collections, Document, DocumentChanges, Lobby},
 };
 use std::collections::{BTreeMap, HashSet};
 
@@ -75,5 +73,19 @@ impl Lobby {
         }
 
         Ok(())
+    }
+
+    pub fn delete_document(
+        &mut self,
+        collection_name: &str,
+        document_id: &str,
+    ) -> Result<bool, VMErrors> {
+        let collection = self
+            .collections
+            .get_mut(collection_name)
+            .ok_or_else(|| VMErrors::CollectionNotFound(format!("{collection_name} not found")))?;
+        let res = collection.remove(document_id);
+
+        Ok(res.is_some())
     }
 }

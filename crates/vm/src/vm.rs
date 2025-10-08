@@ -10,7 +10,6 @@ impl Lobby {
         Self {
             process_id: pid.to_string(),
             collections: BTreeMap::new(),
-            subscribers: Vec::new(),
             processed_txs: HashSet::new(),
         }
     }

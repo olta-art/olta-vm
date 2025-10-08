@@ -34,7 +34,6 @@ pub struct Document {
 pub struct Lobby {
     pub process_id: String,
     pub collections: Collections,
-    pub subscribers: Vec<Subscriber>,
     pub processed_txs: HashSet<String>,
 }
 

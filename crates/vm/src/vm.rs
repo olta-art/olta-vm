@@ -11,7 +11,7 @@ impl Lobby {
             process_id: pid.to_string(),
             collections: BTreeMap::new(),
             processed_txs: HashSet::new(),
-            hot: false
+            hot: false,
         }
     }
 

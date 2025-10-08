@@ -35,7 +35,7 @@ pub struct Lobby {
     pub process_id: String,
     pub collections: Collections,
     pub processed_txs: HashSet<String>,
-    pub hot: bool
+    pub hot: bool,
 }
 
 /// Delta upates

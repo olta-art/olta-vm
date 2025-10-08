@@ -5,7 +5,5 @@ pub enum VMErrors {
     SerializationError(String),
     WebSocketError(String),
     CollectionUpdateError(String),
-    InvalidDocumentNonce(String),
-    DuplicateRequest,
     CollectionNotFound(String),
 }

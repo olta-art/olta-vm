@@ -1,6 +1,7 @@
+pub use crate::types::Lobby;
 use crate::{
     errors::VMErrors,
-    types::{Collections, Document, DocumentChanges, Lobby},
+    types::{Collection, Collections, Document, DocumentChanges},
 };
 use std::collections::{BTreeMap, HashSet};
 
@@ -16,6 +17,14 @@ impl Lobby {
 
     pub fn get_full_state(&self) -> Result<Collections, VMErrors> {
         Ok(self.collections.clone())
+    }
+
+    pub fn get_collection(&self, collection_name: &str) -> Result<Collection, VMErrors> {
+        let collection = self
+            .collections
+            .get(collection_name)
+            .ok_or_else(|| VMErrors::CollectionNotFound(("".to_string())))?;
+        Ok(collection.clone())
     }
 
     // server-authoritative design, deterministic sequential documents insertion

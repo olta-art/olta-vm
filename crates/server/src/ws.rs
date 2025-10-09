@@ -20,13 +20,12 @@ pub async fn handle_websocket(
 
     {
         let mut server = server.lock().await;
-        server.create_lobby(&process_id).ok();
         server.add_subscriber(&process_id, tx);
     }
 
     {
         let mut server = server.lock().await;
-        if let Ok(lobby) = server.get_lobby(&process_id) {
+        if let Ok(lobby) = server.get_lobby(&process_id).await {
             if let Ok(collections) = lobby.get_full_state() {
                 let full_sync = Output::FullSync { process_id: process_id.clone(), collections };
                 if let Ok(msg) = serde_json::to_string(&full_sync) {

@@ -14,3 +14,4 @@ anyhow = {workspace = true}
 dotenvy = {workspace = true}
 
 vm = { path = "../vm"}
+storage = { path = "../storage"}

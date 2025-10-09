@@ -30,7 +30,7 @@ pub struct Document {
 }
 
 /// an artwork lobby - instance
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Lobby {
     pub process_id: String,
     pub collections: Collections,

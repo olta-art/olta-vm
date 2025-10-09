@@ -21,7 +21,8 @@ use ws::handle_websocket;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let server = Arc::new(Mutex::new(Server::new()));
+    let db_url = get_env_var("DATABASE_URL")?;
+    let server = Arc::new(Mutex::new(Server::new(&db_url).await?));
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
     println!("server listening on ws://127.0.0.1:8080");
 

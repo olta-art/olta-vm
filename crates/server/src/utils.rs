@@ -1,6 +1,6 @@
-use std::env;
+use anyhow::Error;
 use dotenvy::dotenv;
-use anyhow::Error; 
+use std::env;
 
 pub fn get_env_var(key: &str) -> Result<String, Error> {
     dotenv().ok();

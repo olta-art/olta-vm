@@ -12,9 +12,10 @@ use url::Url;
 mod messages;
 mod server;
 mod types;
-mod ws;
 mod utils;
+mod ws;
 
+use crate::utils::get_env_var;
 use server::Server;
 use ws::handle_websocket;
 
@@ -34,16 +35,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 async fn handle_connection(stream: TcpStream, server: Arc<Mutex<Server>>) {
     let mut process_id = "default".to_string();
-    
 
     let callback = |req: &Request, response: Response| {
-        if let Ok(url) = Url::parse(&format!("http://localhost{}", req.uri().path())) {
+        if let Ok(url) = Url::parse(&format!("http://localhost{}", req.uri())) {
             let segments: Vec<&str> = url.path_segments().unwrap().collect();
             // route path localhost/ws/:pid
             if segments.len() >= 2 && segments[0] == "ws" {
                 process_id = segments[1].to_string();
             }
+
+            let token = url
+                .query_pairs()
+                .find(|(key, _)| key == "token")
+                .map(|(_, value)| value.to_string());
+
+            if token.unwrap_or_default() != get_env_var("TOKEN").unwrap() {
+                return Err(Response::builder().status(401).body(None).unwrap());
+            }
         }
+
         Ok(response)
     };
 
@@ -54,6 +64,4 @@ async fn handle_connection(stream: TcpStream, server: Arc<Mutex<Server>>) {
         }
         Err(e) => println!("ws connection error: {}", e),
     }
-
-    todo!("add auth");
 }

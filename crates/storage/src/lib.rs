@@ -1,2 +1,2 @@
 pub mod db;
-pub use db::{Database, DbOperation, DatabaseWorker};
+pub use db::{Database, DatabaseWorker, DbOperation};

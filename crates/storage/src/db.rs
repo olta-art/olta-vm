@@ -1,6 +1,6 @@
-use sqlx::{PgPool, Row};
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use serde_json;
+use sqlx::{PgPool, Row};
 
 /// database connection and operations for lobby persistence
 #[derive(Debug, Clone)]
@@ -16,19 +16,15 @@ pub enum DbOperation {
 impl Database {
     /// create new database connection with pool
     pub async fn new(database_url: &str) -> Result<Self> {
-        let pool = PgPool::connect(database_url)
-            .await
-            .context("Failed to connect to PostgreSQL")?;
-            
+        let pool =
+            PgPool::connect(database_url).await.context("Failed to connect to PostgreSQL")?;
+
         Ok(Self { pool })
     }
 
     /// run database migrations
     pub async fn run_migrations(&self) -> Result<()> {
-        sqlx::migrate!()
-            .run(&self.pool)
-            .await
-            .context("Failed to run migrations")?;
+        sqlx::migrate!().run(&self.pool).await.context("Failed to run migrations")?;
         Ok(())
     }
 
@@ -53,11 +49,13 @@ impl Database {
                 full_state = $2,
                 is_hot = $3,
                 last_activity = NOW()
-            "#
+            "#,
         )
         .bind(process_id)
-        .bind(serde_json::from_str::<serde_json::Value>(full_state)
-            .context("Invalid JSON in full_state")?)
+        .bind(
+            serde_json::from_str::<serde_json::Value>(full_state)
+                .context("Invalid JSON in full_state")?,
+        )
         .bind(is_hot)
         .execute(&self.pool)
         .await
@@ -76,9 +74,7 @@ impl Database {
 
         Ok(row.map(|r| r.get::<serde_json::Value, _>("full_state").to_string()))
     }
-
 }
-
 
 /// background worker for database operations
 pub struct DatabaseWorker {
@@ -87,21 +83,24 @@ pub struct DatabaseWorker {
 }
 
 impl DatabaseWorker {
-    pub fn new(database: Database, receiver: tokio::sync::mpsc::UnboundedReceiver<DbOperation>) -> Self {
+    pub fn new(
+        database: Database,
+        receiver: tokio::sync::mpsc::UnboundedReceiver<DbOperation>,
+    ) -> Self {
         Self { database, receiver }
     }
 
     /// Run the background worker
     pub async fn run(mut self) {
         println!("db worker started");
-        
+
         while let Some(operation) = self.receiver.recv().await {
             if let Err(e) = self.process_operation(operation).await {
                 eprintln!("db operation failed: {}", e);
                 // TODO: implement retry logic with exponential backoff
             }
         }
-        
+
         println!("db worker stopped");
     }
 
@@ -113,5 +112,4 @@ impl DatabaseWorker {
         }
         Ok(())
     }
-
 }

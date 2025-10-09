@@ -13,6 +13,7 @@ mod messages;
 mod server;
 mod types;
 mod ws;
+mod utils;
 
 use server::Server;
 use ws::handle_websocket;
@@ -33,11 +34,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 async fn handle_connection(stream: TcpStream, server: Arc<Mutex<Server>>) {
     let mut process_id = "default".to_string();
+    
 
     let callback = |req: &Request, response: Response| {
         if let Ok(url) = Url::parse(&format!("http://localhost{}", req.uri().path())) {
             let segments: Vec<&str> = url.path_segments().unwrap().collect();
-            // rute path localhost/ws/:pid
+            // route path localhost/ws/:pid
             if segments.len() >= 2 && segments[0] == "ws" {
                 process_id = segments[1].to_string();
             }
@@ -52,4 +54,6 @@ async fn handle_connection(stream: TcpStream, server: Arc<Mutex<Server>>) {
         }
         Err(e) => println!("ws connection error: {}", e),
     }
+
+    todo!("add auth");
 }

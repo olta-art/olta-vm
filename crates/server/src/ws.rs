@@ -37,7 +37,6 @@ pub async fn handle_websocket(
     }
 
     // fwd channel messages to ws
-    let process_id_clone = process_id.clone();
     let ws_sender_task = tokio::spawn(async move {
         while let Some(message) = rx.recv().await {
             if ws_sender.send(Message::Text(message.into())).await.is_err() {

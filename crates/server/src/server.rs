@@ -61,37 +61,6 @@ impl Server {
                 let lobby: Lobby = serde_json::from_str(&state_json)
                     .map_err(|e| anyhow!("failed to deserialize lobby: {}", e))?;
 
-                // match self.database.get_process_documents(pid).await {
-                //     Ok(documents) => {
-                //         println!("Rebuilding collections from {} documents", documents.len());
-
-                //         // Group documents by collection
-                //         for (collection_name, doc_id, _process_id, document_data) in documents {
-                //             // Deserialize the document
-                //             let document: vm::types::Document =
-                // serde_json::from_value(document_data)                 
-                // .map_err(|e| anyhow!("Failed to deserialize document: {}", e))?;
-
-                //             // Get or create collection
-                //             let collection = lobby.collections
-                //                 .entry(collection_name)
-                //                 .or_insert_with(|| std::collections::BTreeMap::new());
-
-                //             // Insert document with doc_id as key
-                //             collection.insert(doc_id, document);
-                //         }
-
-                //         println!("Rebuilt lobby with {} collections", lobby.collections.len());
-                //         for (cname, coll) in &lobby.collections {
-                //             println!("  Collection '{}': {} documents", cname, coll.len());
-                //         }
-                //     }
-                //     Err(e) => {
-                //         println!("Warning: Failed to load documents for lobby {}: {}", pid, e);
-                //         // Continue with empty collections - better than failing completely
-                //     }
-                // }
-
                 // insert rebuilt lobby into memory (make hot)
                 self.lobbies.insert(pid.to_string(), lobby);
 

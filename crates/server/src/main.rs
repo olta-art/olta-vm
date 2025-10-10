@@ -22,35 +22,48 @@ use ws::handle_websocket;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db_url = get_env_var("DATABASE_URL")?;
+    let host = get_env_var("HOST").unwrap_or_else(|_| "0.0.0.0".into());
+    let port: u16 = get_env_var("PORT").ok().and_then(|s| s.parse().ok()).unwrap_or(8080);
+    let bind_addr = format!("{host}:{port}");
+
+    // server state
     let server = Arc::new(Mutex::new(Server::new(&db_url).await?));
-    let listener = TcpListener::bind("127.0.0.1:8080").await?;
-    println!("server listening on ws://127.0.0.1:8080");
+
+    let listener = TcpListener::bind(&bind_addr).await?;
+    println!("server listening on ws://{host}:{port}");
 
     while let Ok((stream, addr)) = listener.accept().await {
-        println!("new ws connection from: {}", addr);
+        println!("new ws connection from: {addr}");
         let server = server.clone();
         tokio::spawn(handle_connection(stream, server));
     }
+
     Ok(())
 }
 
 async fn handle_connection(stream: TcpStream, server: Arc<Mutex<Server>>) {
-    let mut process_id = "default".to_string();
+    let mut process_id = String::from("default");
+    let expected_token = get_env_var("TOKEN").unwrap_or_else(|_| "OLTA".into());
 
     let callback = |req: &Request, response: Response| {
-        if let Ok(url) = Url::parse(&format!("http://localhost{}", req.uri())) {
+        let dummy = format!("ws://placeholder{}", req.uri());
+        if let Ok(url) = Url::parse(&dummy) {
             let segments: Vec<&str> = url.path_segments().unwrap().collect();
-            // route path localhost/ws/:pid
+
+            // route: /ws/:pid
             if segments.len() >= 2 && segments[0] == "ws" {
                 process_id = segments[1].to_string();
             }
 
-            let token = url
+            // token=? in query
+            let token_ok = url
                 .query_pairs()
-                .find(|(key, _)| key == "token")
-                .map(|(_, value)| value.to_string());
+                .find(|(k, _)| k == "token")
+                .map(|(_, v)| v)
+                .map(|v| v == expected_token.as_str())
+                .unwrap_or(false);
 
-            if token.unwrap_or_default() != get_env_var("TOKEN").unwrap() {
+            if !token_ok {
                 return Err(Response::builder().status(401).body(None).unwrap());
             }
         }
@@ -60,9 +73,9 @@ async fn handle_connection(stream: TcpStream, server: Arc<Mutex<Server>>) {
 
     match accept_hdr_async(stream, callback).await {
         Ok(ws_stream) => {
-            println!("client joined artwork: {}", process_id);
+            println!("client joined process: {process_id}");
             handle_websocket(ws_stream, process_id, server).await;
         }
-        Err(e) => println!("ws connection error: {}", e),
+        Err(e) => eprintln!("ws connection error: {e}"),
     }
 }

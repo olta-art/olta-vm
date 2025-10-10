@@ -1,0 +1,14 @@
+[Unit]
+Description=OLTA VM Server
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/olta-vm
+EnvironmentFile=/opt/olta-vm/.env
+ExecStart=/home/www-data/.cargo/bin/cargo run --bin server
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

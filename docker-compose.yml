@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16
+    container_name: olta-vm-db
+    environment:
+      POSTGRES_DB: olta_vm
+      POSTGRES_USER: olta_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [appnet]
+
+  app:
+    build: .
+    container_name: olta-vm-app
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0         
+      PORT: ${PORT:-8080}
+      DATABASE_URL: ${DATABASE_URL}
+      RUST_LOG: ${RUST_LOG:-info}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+    networks: [appnet]
+
+volumes:
+  pgdata:
+
+networks:
+  appnet:
+    driver: bridge

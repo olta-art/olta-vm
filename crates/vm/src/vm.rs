@@ -1,7 +1,7 @@
 pub use crate::types::Lobby;
 use crate::{
     errors::VMErrors,
-    types::{Collection, Collections, Document, DocumentChanges},
+    types::{Collection, CollectionData, Collections, Document, DocumentChanges},
 };
 use std::collections::{BTreeMap, HashSet};
 
@@ -60,26 +60,68 @@ impl Lobby {
         let document =
             collection.get_mut(doc_id).ok_or(VMErrors::DocumentNotFound(doc_id.to_string()))?;
 
-        if let Some(x) = &changes.x {
-            document.x = x.to_string();
-        }
-        if let Some(y) = &changes.y {
-            document.y = y.to_string();
-        }
-        if let Some(z) = &changes.z {
-            document.z = z.to_string();
-        }
-        if let Some(color) = &changes.color {
-            document.color = color.to_string();
-        }
-        if let Some(rot_x) = &changes.rot_x {
-            document.rot_x = rot_x.to_string();
-        }
-        if let Some(rot_y) = &changes.rot_y {
-            document.rot_y = rot_y.to_string();
-        }
-        if let Some(rot_z) = &changes.rot_z {
-            document.rot_z = rot_z.to_string();
+        // Match on the enum to update the appropriate fields
+        match &mut document.data {
+            CollectionData::Cube(cube) => {
+                if let Some(x) = &changes.x {
+                    cube.x = x.to_string();
+                }
+                if let Some(y) = &changes.y {
+                    cube.y = y.to_string();
+                }
+                if let Some(z) = &changes.z {
+                    cube.z = z.to_string();
+                }
+                if let Some(color) = &changes.color {
+                    cube.color = color.to_string();
+                }
+                if let Some(rot_x) = &changes.rot_x {
+                    cube.rot_x = rot_x.to_string();
+                }
+                if let Some(rot_y) = &changes.rot_y {
+                    cube.rot_y = rot_y.to_string();
+                }
+                if let Some(rot_z) = &changes.rot_z {
+                    cube.rot_z = rot_z.to_string();
+                }
+            }
+            CollectionData::Vertex(vertex) => {
+                if let Some(x) = &changes.x {
+                    vertex.x = x.to_string();
+                }
+                if let Some(y) = &changes.y {
+                    vertex.y = y.to_string();
+                }
+                if let Some(z) = &changes.z {
+                    vertex.z = z.to_string();
+                }
+                if let Some(line_color) = &changes.line_color {
+                    vertex.line_color = line_color.to_string();
+                }
+                if let Some(vertex_color) = &changes.vertex_color {
+                    vertex.vertex_color = vertex_color.to_string();
+                }
+                if let Some(camera_x) = &changes.camera_x {
+                    vertex.camera_x = camera_x.to_string();
+                }
+                if let Some(camera_y) = &changes.camera_y {
+                    vertex.camera_y = camera_y.to_string();
+                }
+                if let Some(camera_z) = &changes.camera_z {
+                    vertex.camera_z = camera_z.to_string();
+                }
+            }
+            CollectionData::Splash(splash) => {
+                if let Some(x) = &changes.x {
+                    splash.x = x.to_string();
+                }
+                if let Some(y) = &changes.y {
+                    splash.y = y.to_string();
+                }
+                if let Some(seed) = &changes.seed {
+                    splash.seed = seed.to_string();
+                }
+            }
         }
 
         self.hot = true;

@@ -15,7 +15,23 @@ This workpace is being designed to be shipped as a HyperBEAM device in its final
 | [`server`](./crates/server/)      | the vm's API - over websockers     | `v0.1.0` |
 | `ao`      | the compute truth source & provenance     | `wip` |
 
+## Benchmarks
+
 * server endpoint `wss://olta-vm.load.network/`
+
+### CrateDocument
+
+```bash
+Paylod: CreateDocument
+Ping:    335.59 µs | Avg:    520.90 µs | Jitter:    236.20 µs | FPS:  2979.8     
+
+--- Final Stats ---
+Samples: 3
+Average: 520.90 µs
+Min: 335.59 µs
+Max: 854.24 µs
+Jitter (stdev): 236.20 µs
+```
 
 ## License 
 
